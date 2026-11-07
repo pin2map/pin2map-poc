@@ -8711,6 +8711,56 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  #mapScreen .topbar .quick-place{gap:8px!important}
 }
 @media(min-width:700px){#mapScreen #p2m-poc-main-menu{width:320px}}
+/* PoC invariant: every round control is a mathematically exact circle. */
+#mapScreen .map-round-control,
+#mapScreen .list-round,
+#mapScreen .label-toggle,
+#mapScreen .elevation-toggle,
+#mapScreen .p2m-poc-menu-btn,
+#mapScreen #quick983Type,
+#mapScreen .quick984-selector{
+ box-sizing:border-box!important;
+ aspect-ratio:1 / 1!important;
+ border-radius:50%!important;
+ flex-shrink:0!important;
+}
+#mapScreen .map-round-control,
+#mapScreen .list-round,
+#mapScreen .label-toggle,
+#mapScreen .elevation-toggle{
+ width:44px!important;height:44px!important;
+ min-width:44px!important;min-height:44px!important;
+ max-width:44px!important;max-height:44px!important;
+}
+#mapScreen .topbar .quick-place>.p2m-poc-menu-btn,
+#mapScreen .topbar .quick-place>.quick984-selector,
+#mapScreen .topbar .quick-place .quick984-selector>#quick983Type{
+ width:44px!important;height:44px!important;
+ min-width:44px!important;min-height:44px!important;
+ max-width:44px!important;max-height:44px!important;
+ flex:0 0 44px!important;
+}
+#p2m-poc-main-menu .p2m-poc-file-actions{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:6px 0 12px;
+}
+#p2m-poc-main-menu .p2m-poc-file-button{
+ display:flex;align-items:center;justify-content:center;gap:8px;
+ width:100%;min-width:0;min-height:48px;
+ border:1px solid #b7c6d5;border-radius:10px;background:#e9f2fb;color:#132b43;
+ font-size:15px;font-weight:600;line-height:1.2;padding:10px 8px;margin:0;
+ cursor:pointer;white-space:nowrap;touch-action:manipulation;
+}
+#p2m-poc-main-menu .p2m-poc-file-button span:first-child{font-size:19px;line-height:1}
+#p2m-poc-main-menu .p2m-poc-file-button:active,
+#p2m-poc-main-menu .p2m-poc-file-button:focus-visible{background:#cee5fa;border-color:#478ec8}
+@media(max-width:600px),(pointer:coarse) and (max-width:900px){
+ #mapScreen .topbar .quick-place>.p2m-poc-menu-btn,
+ #mapScreen .topbar .quick-place>.quick984-selector,
+ #mapScreen .topbar .quick-place .quick984-selector>#quick983Type{
+  width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
+  max-width:40px!important;max-height:40px!important;flex:0 0 40px!important;
+ }
+}
 </style>
 <script id="p2m-poc-topmenu-js">
 (function(){
@@ -8726,8 +8776,9 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  panel.innerHTML=
   '<div class="p2m-poc-menu-head"><strong>Menü</strong><button type="button" class="p2m-poc-close" aria-label="Menü schließen">×</button></div>'+
   '<div class="p2m-poc-menu-section">Projekt</div>'+
-  '<button type="button" class="p2m-poc-menu-action" data-p2m-forward="openProjectFile"><span>📂</span>Datei öffnen</button>'+
-  '<button type="button" class="p2m-poc-menu-action" data-p2m-forward="saveProjectFile"><span>💾</span>Datei speichern</button>'+
+  '<div class="p2m-poc-file-actions">'+
+  '<button type="button" class="p2m-poc-file-button" data-p2m-forward="openProjectFile"><span aria-hidden="true">📂</span><span>Öffnen</span></button>'+
+  '<button type="button" class="p2m-poc-file-button" data-p2m-forward="saveProjectFile"><span aria-hidden="true">💾</span><span>Speichern</span></button></div>'+
   '<div class="p2m-poc-divider"></div><div class="p2m-poc-menu-section">Darstellung</div>'+
   '<button type="button" class="p2m-poc-menu-action" data-p2m-forward="legendToggle"><span>☷</span>Kategorien anzeigen / ausblenden</button>'+
   '<div class="p2m-poc-menu-section">Obere Pin-Informationen</div>'+
