@@ -8774,7 +8774,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  var panel=document.createElement('div');panel.id='p2m-poc-main-menu';panel.hidden=true;
  panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Hauptmenü');
  panel.innerHTML=
-  '<div class="p2m-poc-menu-head"><strong>Menü</strong><button type="button" class="p2m-poc-close" aria-label="Menü schließen">×</button></div>'+
+  '<div class="p2m-poc-menu-head"><strong>pin2map V10.00.00</strong><div class="p2m-poc-status-full" aria-label="Statusübersicht"></div><button type="button" class="p2m-poc-close" aria-label="Menü schließen">×</button></div>'+
   '<div class="p2m-poc-menu-section">Projekt</div>'+
   '<div class="p2m-poc-file-actions">'+
   '<button type="button" class="p2m-poc-file-button" data-p2m-forward="openProjectFile"><span aria-hidden="true">📂</span><span>Öffnen</span></button>'+
@@ -8798,6 +8798,110 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  document.addEventListener('pointerdown',function(e){if(!panel.hidden&&!panel.contains(e.target)&&!button.contains(e.target))close()},true);
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!panel.hidden){e.stopPropagation();close();button.focus()}},true);
  window.addEventListener('resize',function(){if(!panel.hidden)position()});
+})();
+</script>
+
+<!-- PoC iteration: permanent compact status symbols + full status collection in menu header.
+     UI-only placeholders: NO fake server confirmation or save-success state. -->
+<style id="p2m-poc-status-preview-css">
+#mapScreen .topbar .quick-place>.p2m-poc-status-mini{
+ order:2!important;display:flex!important;align-items:center!important;justify-content:center!important;
+ gap:2px!important;flex:0 0 auto!important;min-width:0!important;margin:0!important;padding:1px 2px!important;
+ border:1px solid #c7cad0!important;border-radius:9px!important;
+ background:rgba(245,245,247,.93)!important;box-sizing:border-box!important;
+}
+#mapScreen .topbar .quick-place>.quick984-selector{order:3!important}
+#mapScreen .p2m-poc-status-mini button{
+ all:unset!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;
+ width:23px!important;height:28px!important;min-width:23px!important;min-height:28px!important;
+ border-radius:5px!important;text-align:center!important;font-size:16px!important;color:#535963!important;
+ cursor:pointer!important;line-height:1!important;touch-action:manipulation!important;
+}
+#mapScreen .p2m-poc-status-mini button:focus-visible,
+#mapScreen .p2m-poc-status-mini button:active{outline:2px solid #3386cc!important;outline-offset:0!important;background:#e0edfa!important}
+#p2m-poc-main-menu .p2m-poc-menu-head{
+ display:grid;grid-template-columns:minmax(0,1fr) auto 33px;
+ align-items:center;gap:5px!important;padding:2px 0 8px!important;
+}
+#p2m-poc-main-menu .p2m-poc-menu-head strong{
+ font-size:13px!important;white-space:nowrap;letter-spacing:-.25px;min-width:0;
+}
+#p2m-poc-main-menu .p2m-poc-status-full{
+ display:flex;align-items:center;justify-content:center;gap:1px;
+ padding:2px 3px;background:#eff0f2;border:1px solid #d3d6dc;border-radius:8px;
+}
+#p2m-poc-main-menu .p2m-poc-status-full button{
+ all:unset;display:grid;place-items:center;box-sizing:border-box;
+ width:24px;height:30px;min-width:24px;min-height:30px;
+ font-size:16px;line-height:1;color:#535963;cursor:pointer;border-radius:5px;
+}
+#p2m-poc-main-menu .p2m-poc-status-full button:focus-visible,
+#p2m-poc-main-menu .p2m-poc-status-full button:active{background:#dbeaff;outline:2px solid #3987da}
+#p2m-poc-main-menu .p2m-poc-status-details{
+ font-size:12px;line-height:1.4;background:#f7f7f9;border:1px solid #dce0e5;
+ border-radius:9px;margin:0 1px 10px;padding:9px 10px;color:#454a53;
+}
+#p2m-poc-main-menu .p2m-poc-status-details[hidden]{display:none!important}
+#p2m-poc-main-menu .p2m-poc-status-details strong{display:block;color:#20242b;margin-bottom:3px}
+#p2m-poc-main-menu .p2m-poc-status-details .p2m-poc-demo-label{
+ font-size:11px;font-weight:600;color:#666;display:block;margin-top:4px;
+}
+#p2m-poc-main-menu .p2m-poc-file-button{
+ background:#f7f8fa!important;border:1px solid #d1d5da!important;color:#111!important;
+ border-radius:8px!important;min-height:44px!important;font-size:13px!important;
+ font-weight:500!important;padding:10px 5px!important;gap:6px!important;
+}
+#p2m-poc-main-menu .p2m-poc-file-button:focus-visible,
+#p2m-poc-main-menu .p2m-poc-file-button:active{background:#e0eeff!important;border-color:#3987da!important}
+@media(max-width:420px){
+ #mapScreen .p2m-poc-status-mini button{width:21px!important;min-width:21px!important;height:27px!important;min-height:27px!important;font-size:15px!important}
+ #mapScreen .p2m-poc-status-mini{gap:0!important}
+ #mapScreen .topbar .quick-place{gap:5px!important}
+ #p2m-poc-main-menu .p2m-poc-status-full button{width:21px;height:28px;min-width:21px;min-height:28px;font-size:14px}
+ #p2m-poc-main-menu .p2m-poc-menu-head strong{font-size:12px!important}
+}
+</style>
+<script id="p2m-poc-status-preview-js">
+(function(){
+ var screen=document.getElementById('mapScreen');
+ var quick=screen&&screen.querySelector('.topbar .quick-place');
+ var panel=document.getElementById('p2m-poc-main-menu');
+ if(!quick||!panel||document.getElementById('p2m-poc-status-mini'))return;
+ var info=[
+  {id:'connection',icon:'⌁',label:'Verbindung',message:'Serververbindung noch nicht angebunden. Online allein bedeutet nicht, dass der Server erreichbar ist.'},
+  {id:'sync',icon:'↻',label:'Synchronisation',message:'Noch keine Cloud-Synchronisierung im PoC. Ein erfolgreicher Abgleich wird nicht behauptet.'},
+  {id:'auth',icon:'♙',label:'Anmeldung',message:'Anmeldung und Sitzungsprüfung sind im PoC noch nicht angebunden.'},
+  {id:'local',icon:'▣',label:'Lokale Sicherung',message:'Der Status der automatischen lokalen Datensicherung ist im PoC noch nicht angebunden. Die manuelle Dateiaktion ist separat.'},
+  {id:'conflicts',icon:'⚠',label:'Konflikte / Fehler',message:'Konflikt- und Fehlerprüfung ist im PoC noch nicht angebunden.'}
+ ];
+ var mini=document.createElement('div');mini.className='p2m-poc-status-mini';mini.id='p2m-poc-status-mini';
+ mini.setAttribute('role','group');mini.setAttribute('aria-label','Statussymbole (Demonstration)');
+ var selector=quick.querySelector('.quick984-selector');quick.insertBefore(mini,selector);
+ var full=panel.querySelector('.p2m-poc-status-full');
+ var details=document.createElement('div');details.className='p2m-poc-status-details';details.hidden=true;
+ details.setAttribute('role','status');details.setAttribute('aria-live','polite');
+ panel.querySelector('.p2m-poc-menu-head').insertAdjacentElement('afterend',details);
+ function show(id){
+  var item=info.filter(function(i){return i.id===id})[0];if(!item)return;
+  var opener=document.getElementById('p2m-poc-main-button');
+  if(panel.hidden&&opener)opener.click();
+  details.hidden=false;
+  details.replaceChildren();
+  var heading=document.createElement('strong');heading.textContent=item.icon+' '+item.label;
+  var msg=document.createElement('div');msg.textContent=item.message;
+  var note=document.createElement('span');note.className='p2m-poc-demo-label';note.textContent='Statusvorschau – keine Live-Daten';
+  details.append(heading,msg,note);
+ }
+ function add(parent,item){
+  var b=document.createElement('button');b.type='button';b.textContent=item.icon;
+  b.title=item.label+' (noch nicht angebunden)';b.setAttribute('aria-label',item.label+': Status noch nicht angebunden');
+  b.addEventListener('click',function(ev){ev.stopPropagation();show(item.id)});
+  parent.appendChild(b);
+ }
+ info.slice(0,3).forEach(function(item){add(mini,item)});
+ info.forEach(function(item){add(full,item)});
+ var menuButton=document.getElementById('p2m-poc-main-button');
+ if(menuButton)menuButton.addEventListener('click',function(){if(!panel.hidden)details.hidden=true});
 })();
 </script>
 </body></html>
