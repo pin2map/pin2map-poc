@@ -8788,7 +8788,19 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
   '<button data-p2m-info="4">Sonnenzeiten</button><button data-p2m-info="5">Zeitzone</button></div>';
  screen.appendChild(panel);
  function close(){panel.hidden=true;button.setAttribute('aria-expanded','false')}
- function position(){var r=button.getBoundingClientRect();panel.style.left=Math.max(10,Math.min(r.left,window.innerWidth-panel.offsetWidth-10))+'px';panel.style.top=Math.min(r.bottom+8,window.innerHeight-70)+'px'}
+ function position(){
+  // Centre the selection menu under the WHOLE top search bar, not its menu button.
+  var bar=screen.querySelector('.topbar');
+  var r=(bar||button).getBoundingClientRect();
+  var viewportWidth=document.documentElement.clientWidth||window.innerWidth;
+  var pw=panel.getBoundingClientRect().width||panel.offsetWidth;
+  var left=r.left+(r.width-pw)/2;
+  left=Math.max(10,Math.min(left,viewportWidth-pw-10));
+  var top=r.bottom+3;
+  panel.style.left=Math.round(left)+'px';
+  panel.style.top=Math.round(top)+'px';
+  panel.style.maxHeight=Math.max(180,Math.floor(window.innerHeight-top-10))+'px';
+ }
  function syncInfo(){var title=document.getElementById('toggleElevations')?.getAttribute('title')||'';var labels=['Aus','Höhe','Temperatur','Tagesminimum','Sonnenaufgang','Zeitzonenabweichung'];var idx=labels.findIndex(function(x){return title.indexOf('Pin-Informationen: '+x)>=0});panel.querySelectorAll('[data-p2m-info]').forEach(function(x){x.setAttribute('aria-pressed',String(Number(x.dataset.p2mInfo)===idx))})}
  function open(){panel.hidden=false;position();syncInfo();button.setAttribute('aria-expanded','true')}
  button.addEventListener('click',function(e){e.stopPropagation();panel.hidden?open():close()});
