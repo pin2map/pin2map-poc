@@ -8913,7 +8913,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
 (function(){
  var panel=document.getElementById('p2m-poc-main-menu');
  var full=panel&&panel.querySelector('.p2m-poc-status-full');
- if(!panel||!full||full.children.length)return;
+ if(!panel||!full||full.querySelector('button'))return;
  var info=[
   {id:'sync',icon:'↻',label:'Synchronisation',message:'Cloud-Synchronisierung im PoC noch nicht angebunden.'},
   {id:'connection',icon:'⌁',label:'Verbindung',message:'Serververbindung im PoC noch nicht angebunden.'},
