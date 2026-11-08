@@ -8410,6 +8410,11 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    infoChoice.style.setProperty('top','auto','important');
    infoChoice.style.setProperty('bottom',minusBottom.toFixed(2)+'px','important');
   }
+  var categoryChoice=document.getElementById('p2m-poc-category-button');
+  if(categoryChoice){
+   categoryChoice.style.setProperty('top','auto','important');
+   categoryChoice.style.setProperty('bottom',minusBottom.toFixed(2)+'px','important');
+  }
   place(info,pr);  // oberes Label wie Zoom plus
   place(categories,ar); // Kategorien wie Autozoom, einschließlich größerem Abstand
   var legend=document.getElementById('legend');
