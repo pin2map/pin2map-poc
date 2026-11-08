@@ -9303,7 +9303,9 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
 #p2m-poc-layer-dialog .p2m-layer-edit{border:0;border-radius:9px;background:#ebebef;color:#222;padding:9px 10px;min-height:38px;font-size:13px;font-weight:600!important;cursor:pointer}
 #p2m-poc-layer-dialog .p2m-layer-cancel{flex:none;border:0;border-radius:11px;background:#e5e5ea;color:#111;font-size:17px!important;min-height:48px;width:100%;cursor:pointer}
 #p2m-poc-layer-dialog .p2m-layer-note{font-size:12px;color:#65656a}
-#p2m-poc-layer-dialog .p2m-layer-editor[hidden]{display:none!important}
+#p2m-poc-layer-dialog .p2m-layer-editor[hidden],
+#p2m-poc-layer-dialog .p2m-layer-list[hidden],
+#p2m-poc-layer-dialog .p2m-layer-actions[hidden]{display:none!important}
 #p2m-poc-layer-dialog .p2m-layer-editor{display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
 #p2m-poc-layer-dialog .p2m-layer-editor label{font-size:13px;font-weight:600}
 #p2m-poc-layer-dialog .p2m-layer-editor input{box-sizing:border-box;border:1px solid #c8c8ce;border-radius:8px;padding:11px;width:100%;font-size:16px}
@@ -9379,6 +9381,11 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  function render(){
   rows=readRows();dialog.querySelector('#p2m-layer-total').textContent=String(rows.length);
   list.replaceChildren();
+  if(showingPreview){
+   var notice=document.createElement('div');notice.className='p2m-layer-note';
+   notice.textContent='Beispieldaten zur Bedienprüfung – keine gespeicherten Projektebenen.';
+   list.appendChild(notice);
+  }
   rows.forEach(function(r){
    var item=document.createElement('div');item.className='p2m-layer-row';
    var check=document.createElement('input');check.className='p2m-layer-check';check.type='checkbox';
