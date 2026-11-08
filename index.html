@@ -9064,14 +9064,17 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-expanded','false');
  var menu=document.createElement('div');menu.id='p2m-poc-info-menu';
  menu.setAttribute('role','menu');menu.setAttribute('aria-label','Obere Pin-Informationen');
- var labels=['Aus','Höhe','Temperatur','Min. / Max.','Sonnenzeiten','Zeitzone'];
- labels.forEach(function(label,idx){
-  var option=document.createElement('button');option.type='button';option.textContent=label;
-  option.setAttribute('role','menuitemradio');option.dataset.mode=String(idx);
+ // Visible order differs from the stable internal mode IDs; keep all existing functionality.
+ var options=[{label:'Höhe',mode:1},{label:'Temperatur',mode:2},
+  {label:'Min. / Max.',mode:3},{label:'Sonnenzeiten',mode:4},
+  {label:'Zeitzone',mode:5},{label:'Aus',mode:0}];
+ options.forEach(function(item){
+  var option=document.createElement('button');option.type='button';option.textContent=item.label;
+  option.setAttribute('role','menuitemradio');option.dataset.mode=String(item.mode);
   option.setAttribute('aria-checked','false');
   option.addEventListener('click',function(ev){
    ev.preventDefault();ev.stopPropagation();
-   if(typeof window.p2mPocSetInfoMode==='function')window.p2mPocSetInfoMode(idx);
+   if(typeof window.p2mPocSetInfoMode==='function')window.p2mPocSetInfoMode(item.mode);
    sync();close();
   });
   menu.appendChild(option);
