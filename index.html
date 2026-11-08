@@ -8392,18 +8392,31 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    el.style.setProperty('right',Math.max(0,pr.left-sr.left).toFixed(2)+'px','important');
    el.style.setProperty('left','auto','important');
   }
-  place(names,mr); // PoC: Abc auf dieselbe horizontale Linie wie Zoom minus.
-  // Kartenart mittig auf exakt gleicher Höhe; Kartenarten-Liste öffnet darüber.
+  // Abc is now the centered bottom button, on the Zoom-minus horizontal line.
+  var minusBottom=Math.max(0,sr.bottom-mr.bottom);
+  names.style.setProperty('top','auto','important');
+  names.style.setProperty('bottom',minusBottom.toFixed(2)+'px','important');
+  names.style.setProperty('left','50%','important');
+  names.style.setProperty('right','auto','important');
+  names.style.setProperty('transform','translateX(-50%)','important');
+  // Map-style button moves to the former right-hand Abc position.
+  var mapRight=Math.max(0,pr.left-sr.left);
+  // Map-style popup follows the relocated button, opening above it.
   var mapStyle=document.getElementById('mapStyleButton');
   var mapStyleMenu=document.getElementById('mapStyleMenu');
-  var minusBottom=Math.max(0,sr.bottom-mr.bottom);
   if(mapStyle){
    mapStyle.style.setProperty('top','auto','important');
    mapStyle.style.setProperty('bottom',minusBottom.toFixed(2)+'px','important');
+   mapStyle.style.setProperty('left','auto','important');
+   mapStyle.style.setProperty('right',mapRight.toFixed(2)+'px','important');
+   mapStyle.style.setProperty('transform','none','important');
   }
   if(mapStyleMenu){
    mapStyleMenu.style.setProperty('top','auto','important');
    mapStyleMenu.style.setProperty('bottom',(minusBottom+mr.height+12).toFixed(2)+'px','important');
+   mapStyleMenu.style.setProperty('left','auto','important');
+   mapStyleMenu.style.setProperty('right',mapRight.toFixed(2)+'px','important');
+   mapStyleMenu.style.setProperty('transform','none','important');
   }
   var infoChoice=document.getElementById('p2m-poc-info-button');
   if(infoChoice){
@@ -9223,4 +9236,27 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  },true);
 })();
 </script>
+
+<!-- PoC: Abc and map-style buttons exchanged; i and categories stay in place. -->
+<style id="p2m-poc-swap-abc-mapstyle-css">
+#mapScreen #labelToggle.p2m-control-six{
+ position:absolute!important;top:auto!important;
+ bottom:max(38px,calc(env(safe-area-inset-bottom) + 24px))!important;
+ left:50%!important;right:auto!important;
+ transform:translateX(-50%)!important;translate:none!important;
+ width:44px!important;height:44px!important;
+ min-width:44px!important;min-height:44px!important;
+ max-width:44px!important;max-height:44px!important;
+ border-radius:50%!important;aspect-ratio:1/1!important;box-sizing:border-box!important;
+ z-index:1300!important;
+}
+#mapScreen #mapStyleButton.p2m-control-six{
+ left:auto!important;right:max(10px,env(safe-area-inset-right))!important;
+ transform:none!important;translate:none!important;
+}
+#mapScreen #mapStyleMenu{
+ left:auto!important;right:max(10px,env(safe-area-inset-right))!important;
+ transform:none!important;translate:none!important;
+}
+</style>
 </body></html>
