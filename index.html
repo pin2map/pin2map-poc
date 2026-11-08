@@ -9432,10 +9432,16 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    var info=document.createElement('div');info.className='p2m-layer-count';
    info.textContent='Anzahl Objekte: '+r.count;
    content.append(head,info);
-   var edit=document.createElement('button');edit.className='p2m-layer-edit';edit.type='button';
-   edit.textContent='✎ Bearbeiten';edit.setAttribute('aria-label',r.name+' bearbeiten');
-   edit.addEventListener('click',function(){openEditor('edit',r)});
-   item.append(check,content,edit);list.appendChild(item);
+   item.append(check,content);
+   // Special system layers Privat and Import/Rettung are not editable.
+   var lockedLayer=r.key==='private'||/^import(?:\s*\/\s*rettung)?$/i.test(r.name)||/^rettung$/i.test(r.name)||/^existing:(?:import|rettung)(?:\s|$|\/)/i.test(r.key);
+   if(!lockedLayer){
+    var edit=document.createElement('button');edit.className='p2m-layer-edit';edit.type='button';
+    edit.textContent='✎ Bearbeiten';edit.setAttribute('aria-label',r.name+' bearbeiten');
+    edit.addEventListener('click',function(){openEditor('edit',r)});
+    item.appendChild(edit);
+   }
+   list.appendChild(item);
   });
  }
  function showEditor(heading,description,fields,confirm,save){
@@ -9492,8 +9498,9 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    if(act==='new'||act==='merge'){openEditor(act);return}
    rows.forEach(function(r){setChecked(r,act==='all'?true:act==='none'?false:!isChecked(r))});
    render();
-   // Visibility actions change only the draft, never the underlying map until Apply.
-   // Keep the dropdown open to permit successive operations.
+   // Choosing a visibility command closes only this dropdown, not the Ebenendialog.
+   // Changes stay as a draft until Anwenden is pressed.
+   closeViewMenu();
   });
  });
  function close(){
