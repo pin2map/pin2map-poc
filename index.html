@@ -8960,4 +8960,40 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  if(main)main.addEventListener('click',function(){if(!panel.hidden)details.hidden=true});
 })();
 </script>
+
+<!-- PoC: Kartenart-Auswahl horizontal mittig am unteren Kartenrand. -->
+<style id="p2m-poc-centered-bottom-map-style">
+#mapScreen #mapStyleButton.p2m-control-six{
+ position:absolute!important;
+ top:auto!important;
+ bottom:max(38px,calc(env(safe-area-inset-bottom) + 24px))!important;
+ left:50%!important;
+ right:auto!important;
+ transform:translateX(-50%)!important;
+ translate:none!important;
+ width:44px!important;
+ height:44px!important;
+ min-width:44px!important;
+ min-height:44px!important;
+ max-width:44px!important;
+ max-height:44px!important;
+ aspect-ratio:1/1!important;
+ border-radius:50%!important;
+ box-sizing:border-box!important;
+ z-index:1300!important;
+}
+#mapScreen #mapStyleMenu{
+ position:absolute!important;
+ top:auto!important;
+ bottom:max(96px,calc(env(safe-area-inset-bottom) + 82px))!important;
+ left:50%!important;
+ right:auto!important;
+ transform:translateX(-50%)!important;
+ translate:none!important;
+ width:max-content!important;
+ min-width:150px!important;
+ max-width:calc(100vw - 24px)!important;
+ z-index:3000!important;
+}
+</style>
 </body></html>
