@@ -9482,7 +9482,8 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  dialog.querySelector('.p2m-layer-cancel').addEventListener('click',close);
  dialog.addEventListener('click',function(ev){
   if(ev.target===dialog){close();return}
-  if(!viewMenu.hidden&&!viewMenu.contains(ev.target)&&!viewTrigger.contains(ev.target))closeViewMenu();
+  // Checkbox actions never close the Ansicht dropdown or the Ebenendialog.
+  if(!viewMenu.hidden&&!viewMenu.contains(ev.target)&&!viewTrigger.contains(ev.target)&&!ev.target.closest('.p2m-layer-check'))closeViewMenu();
  });
  dialog.addEventListener('keydown',function(ev){if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();if(!viewMenu.hidden)closeViewMenu();else close()}});
 })();
