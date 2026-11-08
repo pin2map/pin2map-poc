@@ -8392,18 +8392,18 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    el.style.setProperty('right',Math.max(0,pr.left-sr.left).toFixed(2)+'px','important');
    el.style.setProperty('left','auto','important');
   }
-  place(names,pr); // PoC: Abc auf dieselbe horizontale Linie wie Zoom plus.
+  place(names,mr); // PoC: Abc auf dieselbe horizontale Linie wie Zoom minus.
   // Kartenart mittig auf exakt gleicher Höhe; Kartenarten-Liste öffnet darüber.
   var mapStyle=document.getElementById('mapStyleButton');
   var mapStyleMenu=document.getElementById('mapStyleMenu');
-  var plusBottom=Math.max(0,sr.bottom-pr.bottom);
+  var minusBottom=Math.max(0,sr.bottom-mr.bottom);
   if(mapStyle){
    mapStyle.style.setProperty('top','auto','important');
-   mapStyle.style.setProperty('bottom',plusBottom.toFixed(2)+'px','important');
+   mapStyle.style.setProperty('bottom',minusBottom.toFixed(2)+'px','important');
   }
   if(mapStyleMenu){
    mapStyleMenu.style.setProperty('top','auto','important');
-   mapStyleMenu.style.setProperty('bottom',(plusBottom+pr.height+12).toFixed(2)+'px','important');
+   mapStyleMenu.style.setProperty('bottom',(minusBottom+mr.height+12).toFixed(2)+'px','important');
   }
   place(info,pr);  // oberes Label wie Zoom plus
   place(categories,ar); // Kategorien wie Autozoom, einschließlich größerem Abstand
