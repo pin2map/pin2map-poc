@@ -8405,6 +8405,11 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    mapStyleMenu.style.setProperty('top','auto','important');
    mapStyleMenu.style.setProperty('bottom',(minusBottom+mr.height+12).toFixed(2)+'px','important');
   }
+  var infoChoice=document.getElementById('p2m-poc-info-button');
+  if(infoChoice){
+   infoChoice.style.setProperty('top','auto','important');
+   infoChoice.style.setProperty('bottom',minusBottom.toFixed(2)+'px','important');
+  }
   place(info,pr);  // oberes Label wie Zoom plus
   place(categories,ar); // Kategorien wie Autozoom, einschließlich größerem Abstand
   var legend=document.getElementById('legend');
@@ -8792,12 +8797,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
   '<button type="button" class="p2m-poc-file-button" data-p2m-forward="openProjectFile"><span aria-hidden="true">📂</span><span>Öffnen</span></button>'+
   '<button type="button" class="p2m-poc-file-button" data-p2m-forward="saveProjectFile"><span aria-hidden="true">💾</span><span>Speichern</span></button></div>'+
   '<div class="p2m-poc-divider"></div><div class="p2m-poc-menu-section">Darstellung</div>'+
-  '<button type="button" class="p2m-poc-menu-action" data-p2m-forward="legendToggle"><span>☷</span>Kategorien anzeigen / ausblenden</button>'+
-  '<div class="p2m-poc-menu-section">Obere Pin-Informationen</div>'+
-  '<div class="p2m-poc-info-options">'+
-  '<button data-p2m-info="0">Aus</button><button data-p2m-info="1">Höhe</button>'+
-  '<button data-p2m-info="2">Temperatur</button><button data-p2m-info="3">Min. / Max.</button>'+
-  '<button data-p2m-info="4">Sonnenzeiten</button><button data-p2m-info="5">Zeitzone</button></div>';
+  '<button type="button" class="p2m-poc-menu-action" data-p2m-forward="legendToggle"><span>☷</span>Kategorien anzeigen / ausblenden</button>';
  screen.appendChild(panel);
  function close(){panel.hidden=true;button.setAttribute('aria-expanded','false')}
  function position(){
@@ -9008,4 +9008,105 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  z-index:3000!important;
 }
 </style>
+
+<!-- PoC: Oberes Pin-Label-Auswahlmenü mit rundem i links neben der Kartenart. -->
+<style id="p2m-poc-label-menu-css">
+#mapScreen #p2m-poc-info-button{
+ position:absolute!important;z-index:1300!important;
+ top:auto!important;bottom:max(38px,calc(env(safe-area-inset-bottom) + 24px))!important;
+ left:calc(50% - 55px)!important;right:auto!important;
+ transform:translateX(-50%)!important;translate:none!important;
+ box-sizing:border-box!important;aspect-ratio:1 / 1!important;border-radius:50%!important;
+ width:44px!important;height:44px!important;
+ min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ margin:0!important;padding:0!important;
+ background:rgba(255,255,255,.84)!important;border:1px solid #a5abb3!important;
+ color:#111!important;box-shadow:0 2px 7px #0002!important;
+ font:700 24px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+ touch-action:manipulation!important;
+}
+#mapScreen #p2m-poc-info-button:active,#mapScreen #p2m-poc-info-button[aria-expanded="true"]{background:#dceafa!important}
+#mapScreen #p2m-poc-info-menu{
+ position:absolute!important;z-index:3100!important;
+ display:none;box-sizing:border-box!important;
+ width:max-content!important;min-width:165px!important;max-width:calc(100vw - 20px)!important;
+ max-height:min(370px,calc(100dvh - 110px));overflow:auto;
+ padding:7px!important;background:rgba(255,255,255,.98)!important;color:#111!important;
+ border:1px solid #d1d5da!important;border-radius:14px!important;box-shadow:0 3px 14px #0004!important;
+ transform:none!important;translate:none!important;
+ font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+#mapScreen #p2m-poc-info-menu.open{display:block!important}
+#mapScreen #p2m-poc-info-menu button{
+ display:block!important;box-sizing:border-box!important;width:100%!important;
+ min-height:43px!important;height:auto!important;max-height:none!important;
+ padding:10px 11px!important;margin:0!important;
+ background:transparent!important;border:0!important;border-radius:9px!important;
+ color:#111!important;text-align:left!important;
+ font:600 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+ cursor:pointer!important;touch-action:manipulation!important;
+}
+#mapScreen #p2m-poc-info-menu button[aria-checked="true"]{background:#e0eeff!important;color:#124b8b!important}
+#mapScreen #p2m-poc-info-menu button:focus-visible{outline:2px solid #3987da!important}
+</style>
+<script id="p2m-poc-label-menu-js">
+(function(){
+ var screen=document.getElementById('mapScreen'),mapBtn=document.getElementById('mapStyleButton');
+ if(!screen||!mapBtn||document.getElementById('p2m-poc-info-button'))return;
+ var b=document.createElement('button');b.id='p2m-poc-info-button';b.type='button';b.textContent='i';
+ b.title='Obere Pin-Informationen wählen';
+ b.setAttribute('aria-label','Obere Pin-Informationen wählen');
+ b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-expanded','false');
+ var menu=document.createElement('div');menu.id='p2m-poc-info-menu';
+ menu.setAttribute('role','menu');menu.setAttribute('aria-label','Obere Pin-Informationen');
+ var labels=['Aus','Höhe','Temperatur','Min. / Max.','Sonnenzeiten','Zeitzone'];
+ labels.forEach(function(label,idx){
+  var option=document.createElement('button');option.type='button';option.textContent=label;
+  option.setAttribute('role','menuitemradio');option.dataset.mode=String(idx);
+  option.setAttribute('aria-checked','false');
+  option.addEventListener('click',function(ev){
+   ev.preventDefault();ev.stopPropagation();
+   if(typeof window.p2mPocSetInfoMode==='function')window.p2mPocSetInfoMode(idx);
+   sync();close();
+  });
+  menu.appendChild(option);
+ });
+ screen.appendChild(b);screen.appendChild(menu);
+ function sync(){
+  var original=document.getElementById('toggleElevations');
+  var title=original&&original.title||'';
+  var names=['Aus','Höhe','Temperatur','Tagesminimum','Sonnenaufgang','Zeitzonenabweichung'];
+  var selected=names.findIndex(function(x){return title.indexOf('Pin-Informationen: '+x)===0});
+  if(selected<0)selected=0;
+  menu.querySelectorAll('[data-mode]').forEach(function(option){
+   option.setAttribute('aria-checked',String(Number(option.dataset.mode)===selected));
+  });
+ }
+ function position(){
+  var sr=screen.getBoundingClientRect(),r=b.getBoundingClientRect();
+  var w=menu.offsetWidth||170,h=menu.offsetHeight||275;
+  var x=r.left+r.width/2-w/2-sr.left;
+  menu.style.left=Math.round(Math.max(10,Math.min(x,sr.width-w-10)))+'px';
+  menu.style.right='auto';menu.style.bottom='auto';
+  menu.style.top=Math.round(Math.max(10,r.top-sr.top-h-9))+'px';
+ }
+ function open(){
+  var other=document.getElementById('mapStyleMenu');if(other)other.style.display='none';
+  var main=document.getElementById('p2m-poc-main-menu');
+  if(main&&!main.hidden){var closeMain=main.querySelector('.p2m-poc-close');if(closeMain)closeMain.click()}
+  sync();menu.classList.add('open');b.setAttribute('aria-expanded','true');position();
+ }
+ function close(){menu.classList.remove('open');b.setAttribute('aria-expanded','false')}
+ b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();menu.classList.contains('open')?close():open()});
+ ['pointerdown','touchstart','mousedown'].forEach(function(type){
+  b.addEventListener(type,function(ev){ev.stopPropagation()},{passive:true});
+  menu.addEventListener(type,function(ev){ev.stopPropagation()},{passive:true});
+ });
+ document.addEventListener('click',function(ev){if(menu.classList.contains('open')&&!menu.contains(ev.target)&&ev.target!==b)close()});
+ document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&menu.classList.contains('open')){close();b.focus()}});
+ window.addEventListener('resize',function(){if(menu.classList.contains('open'))position()},{passive:true});
+ window.addEventListener('orientationchange',function(){if(menu.classList.contains('open'))position()},{passive:true});
+})();
+</script>
 </body></html>
