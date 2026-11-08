@@ -8392,11 +8392,11 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    el.style.setProperty('right',Math.max(0,pr.left-sr.left).toFixed(2)+'px','important');
    el.style.setProperty('left','auto','important');
   }
-  // Abc is now the centered bottom button, on the Zoom-minus horizontal line.
+  // Abc is now left of center; i takes the center slot, both at Zoom-minus height.
   var minusBottom=Math.max(0,sr.bottom-mr.bottom);
   names.style.setProperty('top','auto','important');
   names.style.setProperty('bottom',minusBottom.toFixed(2)+'px','important');
-  names.style.setProperty('left','50%','important');
+  names.style.setProperty('left','calc(50% - 55px)','important');
   names.style.setProperty('right','auto','important');
   names.style.setProperty('transform','translateX(-50%)','important');
   // Map-style button moves to the former right-hand Abc position.
@@ -8422,6 +8422,9 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
   if(infoChoice){
    infoChoice.style.setProperty('top','auto','important');
    infoChoice.style.setProperty('bottom',minusBottom.toFixed(2)+'px','important');
+   infoChoice.style.setProperty('left','50%','important');
+   infoChoice.style.setProperty('right','auto','important');
+   infoChoice.style.setProperty('transform','translateX(-50%)','important');
   }
   var categoryChoice=document.getElementById('p2m-poc-category-button');
   if(categoryChoice){
@@ -9257,6 +9260,17 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
 #mapScreen #mapStyleMenu{
  left:auto!important;right:max(10px,env(safe-area-inset-right))!important;
  transform:none!important;translate:none!important;
+}
+</style>
+<!-- PoC: Swap i and Abc positions without changing functionality. -->
+<style id="p2m-poc-swap-info-abc-css">
+#mapScreen #labelToggle.p2m-control-six{
+ left:calc(50% - 55px)!important;right:auto!important;
+ transform:translateX(-50%)!important;
+}
+#mapScreen #p2m-poc-info-button{
+ left:50%!important;right:auto!important;
+ transform:translateX(-50%)!important;
 }
 </style>
 </body></html>
