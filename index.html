@@ -9319,7 +9319,12 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
 #p2m-poc-layer-dialog .p2m-layer-emoji{font-size:1em;line-height:inherit;margin-right:6px;vertical-align:baseline}
 #p2m-poc-layer-dialog .p2m-layer-count{font-size:13px;color:#636363;margin-top:4px}
 #p2m-poc-layer-dialog .p2m-layer-edit{border:0;border-radius:9px;background:#ebebef;color:#222;padding:9px 10px;min-height:38px;font-size:13px;font-weight:600!important;cursor:pointer}
-#p2m-poc-layer-dialog .p2m-layer-cancel{flex:none;border:0;border-radius:11px;background:#e5e5ea;color:#111;font-size:17px!important;min-height:48px;width:100%;cursor:pointer}
+#p2m-poc-layer-dialog .p2m-layer-footer{display:flex;flex:none;gap:10px;width:100%}
+#p2m-poc-layer-dialog .p2m-layer-cancel,#p2m-poc-layer-dialog .p2m-layer-apply{
+ flex:1;min-width:0;border:0;border-radius:11px;background:#e5e5ea;
+ color:#111;font-size:17px!important;min-height:48px;cursor:pointer
+}
+#p2m-poc-layer-dialog .p2m-layer-apply{background:#d9eaff;color:#0a478b;font-weight:700!important}
 #p2m-poc-layer-dialog .p2m-layer-note{font-size:12px;color:#65656a}
 #p2m-poc-layer-dialog .p2m-layer-editor[hidden],
 #p2m-poc-layer-dialog .p2m-layer-list[hidden],
@@ -9348,7 +9353,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  dialog.innerHTML='<section class="p2m-layer-panel">'+
  '<h2 class="p2m-layer-title">Ebenen in diesem Projekt: <span id="p2m-layer-total">0</span></h2>'+
  '<div class="p2m-layer-actions" role="toolbar" aria-label="Ebenenaktionen">'+
- '<div class="p2m-layer-view-wrap"><button type="button" class="p2m-layer-action p2m-layer-view-trigger" id="p2m-layer-view-trigger" aria-haspopup="menu" aria-expanded="false">Ansicht <span aria-hidden="true">▾</span></button>'+
+ '<div class="p2m-layer-view-wrap"><button type="button" class="p2m-layer-action p2m-layer-view-trigger" id="p2m-layer-view-trigger" aria-haspopup="menu" aria-expanded="false">Sichtbarkeit <span aria-hidden="true">▾</span></button>'+
  '<div class="p2m-layer-view-menu" id="p2m-layer-view-menu" role="menu" hidden>'+
  '<button type="button" role="menuitem" data-act="all">Alle anzeigen</button>'+
  '<button type="button" role="menuitem" data-act="none">Alle ausblenden</button>'+
@@ -9357,10 +9362,12 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  '<button type="button" class="p2m-layer-action" data-act="new"><span aria-hidden="true">＋</span>Neue Ebene</button></div>'+
  '<div class="p2m-layer-list" id="p2m-layer-list"></div>'+
  '<div class="p2m-layer-editor" id="p2m-layer-editor" hidden></div>'+
- '<button class="p2m-layer-cancel" type="button">Abbrechen</button></section>';
+ '<div class="p2m-layer-footer"><button class="p2m-layer-cancel" type="button">Abbrechen</button><button class="p2m-layer-apply" type="button">Anwenden</button></div></section>';
  document.body.appendChild(dialog);
  var list=dialog.querySelector('#p2m-layer-list'),editor=dialog.querySelector('#p2m-layer-editor');
  var selected=new Map(),overrides=new Map(),demoRows=[];
+ // Snapshot checked state on opening. Until Apply, only the dialog's draft changes.
+ var pendingVisibility=new Map();
  var previewExamples=[{key:'sample:hotels',name:'Unterkünfte',symbol:'🏨',count:8},
   {key:'sample:hikes',name:'Wanderziele',symbol:'🥾',count:15},
   {key:'sample:views',name:'Aussichtspunkte',symbol:'🌄',count:6},
@@ -9390,13 +9397,20 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
   all.push.apply(all,demoRows);
   return all.map(function(r){var o=overrides.get(r.key);if(o){r.name=o.name;r.symbol=o.symbol}return r});
  }
- function isChecked(r){
-  if(r.legacy)return r.legacy.checked;
+ function actualChecked(r){
+  if(r.legacy)return !!r.legacy.checked;
   return selected.has(r.key)?selected.get(r.key):r.key!=='sample:views';
  }
- function setChecked(r,v){
-  if(r.legacy&&r.legacy.checked!==v){r.legacy.click()}
-  selected.set(r.key,v);
+ function isChecked(r){return pendingVisibility.has(r.key)?pendingVisibility.get(r.key):actualChecked(r)}
+ function setChecked(r,v){pendingVisibility.set(r.key,!!v)}
+ function applyVisibility(){
+  rows.forEach(function(r){
+   if(!pendingVisibility.has(r.key))return;
+   var value=pendingVisibility.get(r.key);
+   if(r.legacy&&r.legacy.checked!==value)r.legacy.click();
+   if(!r.legacy)selected.set(r.key,value);
+  });
+  pendingVisibility.clear();
  }
  function render(){
   rows=readRows();dialog.querySelector('#p2m-layer-total').textContent=String(rows.length);
@@ -9448,9 +9462,16 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  function closeEditor(){editor.hidden=true;editor.replaceChildren();list.hidden=false;dialog.querySelector('.p2m-layer-actions').hidden=false;render()}
  function openEditor(mode,r){
   if(mode==='new'){
-   showEditor('Neue Ebene','UI-Vorschau: Eine neue Ebene wird nur in dieser Ansicht angelegt, nicht im Projekt gespeichert.',
-    [{label:'Name der Ebene',placeholder:'Neue Ebene'},{label:'Symbol (Emoji)',value:'📁'}],
-    'Vorschau hinzufügen',function(v){if(!v[0])return;demoRows.push(make('demo:'+demoRows.length,v[0],v[1]||'📁',0));closeEditor()});return;
+   // Invoke the existing + Kategorie function in the legacy backend/list view.
+   // Its handler inserts a new # emoji [color] definition and focuses the editor.
+   close();
+   var back=document.getElementById('back');
+   var add=document.getElementById('addCategoryBtn');
+   if(back&&add){
+    back.click();
+    add.click();
+   }
+   return;
   }
   if(mode==='merge'){
    showEditor('Ebenen verbinden','UI-Vorschau: Die spätere Zusammenführungsfunktion ist noch nicht angebunden. Es werden keine Objekte oder Ebenen verändert.',
@@ -9471,18 +9492,27 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    if(act==='new'||act==='merge'){openEditor(act);return}
    rows.forEach(function(r){setChecked(r,act==='all'?true:act==='none'?false:!isChecked(r))});
    render();
-   // Keep the Ansicht dropdown open after visibility actions and checkbox interactions.
-   // The user can close it with the same trigger or by clicking outside.
+   // Visibility actions change only the draft, never the underlying map until Apply.
+   // Keep the dropdown open to permit successive operations.
   });
  });
- function close(){closeViewMenu();dialog.hidden=true;opener.setAttribute('aria-expanded','false');if(!editor.hidden)closeEditor()}
- function open(){render();dialog.hidden=false;opener.setAttribute('aria-expanded','true');dialog.querySelector('.p2m-layer-cancel').focus()}
+ function close(){
+  closeViewMenu();dialog.hidden=true;opener.setAttribute('aria-expanded','false');
+  pendingVisibility.clear();
+  if(!editor.hidden)closeEditor();
+ }
+ function open(){
+  pendingVisibility.clear();render();dialog.hidden=false;
+  opener.setAttribute('aria-expanded','true');
+  dialog.querySelector('.p2m-layer-cancel').focus();
+ }
  window.p2mPocCloseLayerDialog=close;
  window.p2mPocToggleLayerDialog=function(){dialog.hidden?open():close()};
  dialog.querySelector('.p2m-layer-cancel').addEventListener('click',close);
+ dialog.querySelector('.p2m-layer-apply').addEventListener('click',function(){applyVisibility();close()});
  dialog.addEventListener('click',function(ev){
   if(ev.target===dialog){close();return}
-  // Checkbox actions never close the Ansicht dropdown or the Ebenendialog.
+  // Checkbox actions never close the Sichtbarkeit dropdown or the Ebenendialog.
   if(!viewMenu.hidden&&!viewMenu.contains(ev.target)&&!viewTrigger.contains(ev.target)&&!ev.target.closest('.p2m-layer-check'))closeViewMenu();
  });
  dialog.addEventListener('keydown',function(ev){if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();if(!viewMenu.hidden)closeViewMenu();else close()}});
