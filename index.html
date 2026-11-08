@@ -9290,6 +9290,24 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
 }
 #p2m-poc-layer-dialog button:focus-visible,#p2m-poc-layer-dialog input:focus-visible{outline:3px solid #1677ff;outline-offset:2px}
 #p2m-poc-layer-dialog .p2m-layer-action span{font-size:17px}
+#p2m-poc-layer-dialog .p2m-layer-view-wrap{position:relative;flex:none}
+#p2m-poc-layer-dialog .p2m-layer-view-trigger[aria-expanded="true"]{background:#dceafa}
+#p2m-poc-layer-dialog .p2m-layer-view-menu[hidden]{display:none!important}
+#p2m-poc-layer-dialog .p2m-layer-view-menu{
+ position:absolute;top:calc(100% + 5px);left:0;z-index:20;
+ min-width:185px;max-width:calc(100vw - 64px);padding:5px;
+ background:#fff;border:1px solid #d1d1d6;border-radius:11px;
+ box-shadow:0 5px 18px #0003;display:flex;flex-direction:column;gap:2px;
+}
+#p2m-poc-layer-dialog .p2m-layer-view-menu button{
+ display:block;min-height:42px;width:100%;padding:9px 11px;text-align:left;
+ background:transparent;border:0;border-radius:8px;color:#111;
+ font-size:14px;font-weight:600!important;cursor:pointer;
+}
+#p2m-poc-layer-dialog .p2m-layer-view-menu button:active,
+#p2m-poc-layer-dialog .p2m-layer-view-menu button:focus-visible{background:#e7f0ff}
+#p2m-poc-layer-dialog .p2m-layer-actions{overflow:visible!important;flex-wrap:wrap}
+
 #p2m-poc-layer-dialog .p2m-layer-list{min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:8px;padding:2px}
 #p2m-poc-layer-dialog .p2m-layer-row{
  display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:9px;
@@ -9298,7 +9316,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
 #p2m-poc-layer-dialog .p2m-layer-row:focus-within{border-color:#3284e7}
 #p2m-poc-layer-dialog .p2m-layer-check{width:22px;height:22px;accent-color:#0879ff;cursor:pointer}
 #p2m-poc-layer-dialog .p2m-layer-name{font-size:16px;font-weight:750;line-height:1.2;overflow-wrap:anywhere}
-#p2m-poc-layer-dialog .p2m-layer-emoji{font-size:21px;margin-right:6px;vertical-align:middle}
+#p2m-poc-layer-dialog .p2m-layer-emoji{font-size:1em;line-height:inherit;margin-right:6px;vertical-align:baseline}
 #p2m-poc-layer-dialog .p2m-layer-count{font-size:13px;color:#636363;margin-top:4px}
 #p2m-poc-layer-dialog .p2m-layer-edit{border:0;border-radius:9px;background:#ebebef;color:#222;padding:9px 10px;min-height:38px;font-size:13px;font-weight:600!important;cursor:pointer}
 #p2m-poc-layer-dialog .p2m-layer-cancel{flex:none;border:0;border-radius:11px;background:#e5e5ea;color:#111;font-size:17px!important;min-height:48px;width:100%;cursor:pointer}
@@ -9330,9 +9348,11 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  dialog.innerHTML='<section class="p2m-layer-panel">'+
  '<h2 class="p2m-layer-title">Ebenen in diesem Projekt: <span id="p2m-layer-total">0</span></h2>'+
  '<div class="p2m-layer-actions" role="toolbar" aria-label="Ebenenaktionen">'+
- '<button type="button" class="p2m-layer-action" data-act="all"><span aria-hidden="true">◉</span>Alle anzeigen</button>'+
- '<button type="button" class="p2m-layer-action" data-act="none"><span aria-hidden="true">◌</span>Alle ausblenden</button>'+
- '<button type="button" class="p2m-layer-action" data-act="invert"><span aria-hidden="true">⇅</span>Auswahl umkehren</button>'+
+ '<div class="p2m-layer-view-wrap"><button type="button" class="p2m-layer-action p2m-layer-view-trigger" id="p2m-layer-view-trigger" aria-haspopup="menu" aria-expanded="false">Ansicht <span aria-hidden="true">▾</span></button>'+
+ '<div class="p2m-layer-view-menu" id="p2m-layer-view-menu" role="menu" hidden>'+
+ '<button type="button" role="menuitem" data-act="all">Alle anzeigen</button>'+
+ '<button type="button" role="menuitem" data-act="none">Alle ausblenden</button>'+
+ '<button type="button" role="menuitem" data-act="invert">Auswahl umkehren</button></div></div>'+
  '<button type="button" class="p2m-layer-action" data-act="merge"><span aria-hidden="true">🔗</span>Ebenen verbinden</button>'+
  '<button type="button" class="p2m-layer-action" data-act="new"><span aria-hidden="true">＋</span>Neue Ebene</button></div>'+
  '<div class="p2m-layer-list" id="p2m-layer-list"></div>'+
@@ -9440,21 +9460,31 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    [{label:'Name der Ebene',value:r.name},{label:'Symbol (Emoji)',value:r.symbol}],
    'Vorschau übernehmen',function(v){if(!v[0])return;overrides.set(r.key,{name:v[0],symbol:v[1]||'📁'});closeEditor()});
  }
+ var viewTrigger=dialog.querySelector('#p2m-layer-view-trigger');
+ var viewMenu=dialog.querySelector('#p2m-layer-view-menu');
+ function closeViewMenu(){viewMenu.hidden=true;viewTrigger.setAttribute('aria-expanded','false')}
+ function toggleViewMenu(){var willOpen=viewMenu.hidden;viewMenu.hidden=!willOpen;viewTrigger.setAttribute('aria-expanded',String(willOpen))}
+ viewTrigger.addEventListener('click',function(ev){ev.stopPropagation();toggleViewMenu()});
  dialog.querySelectorAll('[data-act]').forEach(function(button){
   button.addEventListener('click',function(){
    var act=button.dataset.act;
    if(act==='new'||act==='merge'){openEditor(act);return}
    rows.forEach(function(r){setChecked(r,act==='all'?true:act==='none'?false:!isChecked(r))});
    render();
+   // Keep the Ansicht dropdown open after visibility actions and checkbox interactions.
+   // The user can close it with the same trigger or by clicking outside.
   });
  });
- function close(){dialog.hidden=true;opener.setAttribute('aria-expanded','false');if(!editor.hidden)closeEditor()}
+ function close(){closeViewMenu();dialog.hidden=true;opener.setAttribute('aria-expanded','false');if(!editor.hidden)closeEditor()}
  function open(){render();dialog.hidden=false;opener.setAttribute('aria-expanded','true');dialog.querySelector('.p2m-layer-cancel').focus()}
  window.p2mPocCloseLayerDialog=close;
  window.p2mPocToggleLayerDialog=function(){dialog.hidden?open():close()};
  dialog.querySelector('.p2m-layer-cancel').addEventListener('click',close);
- dialog.addEventListener('click',function(ev){if(ev.target===dialog)close()});
- dialog.addEventListener('keydown',function(ev){if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();close()}});
+ dialog.addEventListener('click',function(ev){
+  if(ev.target===dialog){close();return}
+  if(!viewMenu.hidden&&!viewMenu.contains(ev.target)&&!viewTrigger.contains(ev.target))closeViewMenu();
+ });
+ dialog.addEventListener('keydown',function(ev){if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();if(!viewMenu.hidden)closeViewMenu();else close()}});
 })();
 </script>
 </body></html>
