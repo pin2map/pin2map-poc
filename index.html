@@ -9155,30 +9155,22 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
 </style>
 <script id="p2m-poc-category-button-js">
 (function(){
- var screen=document.getElementById('mapScreen');
- var original=document.getElementById('legendToggle');
+ var screen=document.getElementById('mapScreen'),original=document.getElementById('legendToggle');
  if(!screen||!original||document.getElementById('p2m-poc-category-button'))return;
  var button=document.createElement('button');
- button.id='p2m-poc-category-button';button.type='button';
- button.textContent='☷';button.title='Kategorien anzeigen / ausblenden';
- button.setAttribute('aria-label','Kategorien anzeigen / ausblenden');
- button.setAttribute('aria-pressed','false');
+ button.id='p2m-poc-category-button';button.type='button';button.textContent='☷';
+ button.title='Ebenen auswählen';button.setAttribute('aria-label','Ebenen auswählen');
+ button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-expanded','false');
  screen.appendChild(button);
- function sync(){
-  var pressed=original.getAttribute('aria-pressed');
-  if(pressed!==null)button.setAttribute('aria-pressed',pressed);
-  button.classList.toggle('p2m-categories-filtered',original.classList.contains('p2m-categories-filtered'));
-  button.title=original.title||'Kategorien anzeigen / ausblenden';
-  button.setAttribute('aria-label',button.title);
- }
- button.addEventListener('click',function(ev){
-  ev.preventDefault();ev.stopPropagation();
-  original.click();sync();
+ function sync(){button.classList.toggle('p2m-categories-filtered',original.classList.contains('p2m-categories-filtered'))}
+ button.addEventListener('click',function(e){
+  e.preventDefault();e.stopPropagation();
+  if(typeof window.p2mPocToggleLayerDialog==='function')window.p2mPocToggleLayerDialog();
  });
  ['pointerdown','touchstart','mousedown'].forEach(function(type){
-  button.addEventListener(type,function(ev){ev.stopPropagation()},{passive:true});
+  button.addEventListener(type,function(e){e.stopPropagation()},{passive:true});
  });
- new MutationObserver(sync).observe(original,{attributes:true,attributeFilter:['class','aria-pressed','title','style']});
+ new MutationObserver(sync).observe(original,{attributes:true,attributeFilter:['class','aria-pressed','title']});
  sync();
 })();
 </script>
@@ -9209,8 +9201,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    if(infoButton)infoButton.setAttribute('aria-expanded','false');
   }
   if(keep!=='categories'){
-   var original=document.getElementById('legendToggle');
-   if(original&&original.getAttribute('aria-pressed')==='true')original.click();
+   if(typeof window.p2mPocCloseLayerDialog==='function')window.p2mPocCloseLayerDialog();
   }
  }
  // D-333 + D-334: one open selection menu; tapping outside closes it.
@@ -9225,7 +9216,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    {id:'main',element:document.getElementById('p2m-poc-main-menu')},
    {id:'map',element:document.getElementById('mapStyleMenu')},
    {id:'info',element:document.getElementById('p2m-poc-info-menu')},
-   {id:'categories',element:document.getElementById('legend')}
+   {id:'categories',element:document.getElementById('p2m-poc-layer-dialog')}
   ];
   // Clicking inside an open menu keeps that menu open until its own action runs.
   var inside=menus.find(function(item){
@@ -9233,7 +9224,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
    if(item.id==='main')return !item.element.hidden;
    if(item.id==='map')return getComputedStyle(item.element).display!=='none';
    if(item.id==='info')return item.element.classList.contains('open');
-   return !!(document.getElementById('legendToggle')?.getAttribute('aria-pressed')==='true');
+   return !item.element.hidden;
   });
   dismissExcept(inside?inside.id:null);
  },true);
@@ -9273,4 +9264,190 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  transform:translateX(-50%)!important;
 }
 </style>
+
+<!-- Layer dialog UI-first: D-335/D-336, same sizing and modal placement as search-result selection. -->
+<style id="p2m-poc-layer-dialog-css">
+#p2m-poc-layer-dialog[hidden]{display:none!important}
+#p2m-poc-layer-dialog{
+ position:fixed!important;inset:0!important;z-index:16000!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ box-sizing:border-box!important;padding:40px 16px!important;
+ background:rgba(0,0,0,.12)!important;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+#p2m-poc-layer-dialog .p2m-layer-panel{
+ position:relative;box-sizing:border-box;display:flex;flex-direction:column;
+ width:calc(100vw - 32px);max-width:560px;max-height:calc(100dvh - 80px);
+ border-radius:14px;background:rgba(255,255,255,.98);box-shadow:0 5px 22px rgba(0,0,0,.32);
+ padding:16px;color:#111;gap:12px;overflow:hidden;
+}
+#p2m-poc-layer-dialog .p2m-layer-title{margin:0;font-size:clamp(18px,4vw,22px);font-weight:750;line-height:1.25}
+#p2m-poc-layer-dialog .p2m-layer-actions{display:flex;gap:6px;flex:none;overflow-x:auto;padding:2px 0 6px;scrollbar-width:thin}
+#p2m-poc-layer-dialog .p2m-layer-action{
+ flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:5px;min-height:43px;
+ border:1px solid #d1d1d6;border-radius:9px;background:#e9e9ed;color:#111;
+ padding:6px 9px;font-size:12px;font-weight:600!important;white-space:nowrap;cursor:pointer;
+}
+#p2m-poc-layer-dialog button:focus-visible,#p2m-poc-layer-dialog input:focus-visible{outline:3px solid #1677ff;outline-offset:2px}
+#p2m-poc-layer-dialog .p2m-layer-action span{font-size:17px}
+#p2m-poc-layer-dialog .p2m-layer-list{min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:8px;padding:2px}
+#p2m-poc-layer-dialog .p2m-layer-row{
+ display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:9px;
+ padding:12px 10px;border:1px solid #d1d1d6;border-radius:11px;background:#fff;min-height:70px;
+}
+#p2m-poc-layer-dialog .p2m-layer-row:focus-within{border-color:#3284e7}
+#p2m-poc-layer-dialog .p2m-layer-check{width:22px;height:22px;accent-color:#0879ff;cursor:pointer}
+#p2m-poc-layer-dialog .p2m-layer-name{font-size:16px;font-weight:750;line-height:1.2;overflow-wrap:anywhere}
+#p2m-poc-layer-dialog .p2m-layer-emoji{font-size:21px;margin-right:6px;vertical-align:middle}
+#p2m-poc-layer-dialog .p2m-layer-count{font-size:13px;color:#636363;margin-top:4px}
+#p2m-poc-layer-dialog .p2m-layer-edit{border:0;border-radius:9px;background:#ebebef;color:#222;padding:9px 10px;min-height:38px;font-size:13px;font-weight:600!important;cursor:pointer}
+#p2m-poc-layer-dialog .p2m-layer-cancel{flex:none;border:0;border-radius:11px;background:#e5e5ea;color:#111;font-size:17px!important;min-height:48px;width:100%;cursor:pointer}
+#p2m-poc-layer-dialog .p2m-layer-note{font-size:12px;color:#65656a}
+#p2m-poc-layer-dialog .p2m-layer-editor[hidden]{display:none!important}
+#p2m-poc-layer-dialog .p2m-layer-editor{display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
+#p2m-poc-layer-dialog .p2m-layer-editor label{font-size:13px;font-weight:600}
+#p2m-poc-layer-dialog .p2m-layer-editor input{box-sizing:border-box;border:1px solid #c8c8ce;border-radius:8px;padding:11px;width:100%;font-size:16px}
+#p2m-poc-layer-dialog .p2m-layer-editor-buttons{display:flex;gap:8px}
+#p2m-poc-layer-dialog .p2m-layer-editor-buttons button{flex:1;border:0;border-radius:9px;min-height:44px;background:#e5e5ea;color:#111;font-size:14px}
+#p2m-poc-layer-dialog .p2m-layer-editor-buttons .p2m-layer-primary{background:#dbeafe;color:#125196;font-weight:700!important}
+@media(max-width:420px){
+ #p2m-poc-layer-dialog .p2m-layer-panel{padding:13px;gap:9px}
+ #p2m-poc-layer-dialog .p2m-layer-row{grid-template-columns:24px minmax(0,1fr) auto;gap:6px;padding:9px 7px}
+ #p2m-poc-layer-dialog .p2m-layer-name{font-size:14px}
+ #p2m-poc-layer-dialog .p2m-layer-edit{padding:8px 7px;font-size:12px}
+}
+</style>
+
+<script id="p2m-poc-layer-dialog-js">
+(function(){
+ var opener=document.getElementById('p2m-poc-category-button');
+ if(!opener||document.getElementById('p2m-poc-layer-dialog'))return;
+ var dialog=document.createElement('div');dialog.id='p2m-poc-layer-dialog';
+ dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');
+ dialog.setAttribute('aria-label','Ebenen in diesem Projekt');dialog.hidden=true;
+ dialog.innerHTML='<section class="p2m-layer-panel">'+
+ '<h2 class="p2m-layer-title">Ebenen in diesem Projekt: <span id="p2m-layer-total">0</span></h2>'+
+ '<div class="p2m-layer-actions" role="toolbar" aria-label="Ebenenaktionen">'+
+ '<button type="button" class="p2m-layer-action" data-act="all"><span aria-hidden="true">◉</span>Alle anzeigen</button>'+
+ '<button type="button" class="p2m-layer-action" data-act="none"><span aria-hidden="true">◌</span>Alle ausblenden</button>'+
+ '<button type="button" class="p2m-layer-action" data-act="invert"><span aria-hidden="true">⇅</span>Auswahl umkehren</button>'+
+ '<button type="button" class="p2m-layer-action" data-act="merge"><span aria-hidden="true">🔗</span>Ebenen verbinden</button>'+
+ '<button type="button" class="p2m-layer-action" data-act="new"><span aria-hidden="true">＋</span>Neue Ebene</button></div>'+
+ '<div class="p2m-layer-list" id="p2m-layer-list"></div>'+
+ '<div class="p2m-layer-editor" id="p2m-layer-editor" hidden></div>'+
+ '<button class="p2m-layer-cancel" type="button">Abbrechen</button></section>';
+ document.body.appendChild(dialog);
+ var list=dialog.querySelector('#p2m-layer-list'),editor=dialog.querySelector('#p2m-layer-editor');
+ var selected=new Map(),overrides=new Map(),demoRows=[];
+ var previewExamples=[{key:'sample:hotels',name:'Unterkünfte',symbol:'🏨',count:8},
+  {key:'sample:hikes',name:'Wanderziele',symbol:'🥾',count:15},
+  {key:'sample:views',name:'Aussichtspunkte',symbol:'🌄',count:6},
+  {key:'sample:food',name:'Essen & Trinken',symbol:'🍽️',count:4}];
+ var showingPreview=false,rows=[],editKey=null,editMode='';
+ function make(key,name,symbol,count,legacy){return {key:key,name:name,symbol:symbol,count:count,legacy:legacy||null}}
+ function visibleLegacy(){return Array.from(document.querySelectorAll('#legend .chip')).filter(function(x){return !x.classList.contains('p2m-river-legend')})}
+ function readRows(){
+  var legacy=visibleLegacy(),all=[];
+  var privateCount=0; // No NEW private store exists yet.
+  all.push(make('private','Privat','🔒',privateCount));
+  var others=[];
+  legacy.forEach(function(node,i){
+   var label=node.querySelector('.p2m-legend-symbol');
+   var nameText=node.textContent.replace(label?label.textContent:'','').trim();
+   var match=nameText.match(/\((\d+)\)\s*$/);
+   var name=match?nameText.slice(0,match.index).trim():nameText;
+   var sym=label?label.textContent.trim():'📁';
+   var key='existing:'+name;
+   others.push(make(key,name,sym,match?Number(match[1]):0,node.querySelector('input[type="checkbox"]')));
+  });
+  var importRows=others.filter(function(r){return /import|rettung/i.test(r.name)});
+  importRows.forEach(function(r){all.push(r)});
+  all.push.apply(all,others.filter(function(r){return importRows.indexOf(r)<0}));
+  showingPreview=!others.length&&!demoRows.length;
+  if(showingPreview)all.push.apply(all,previewExamples.map(function(r){return make(r.key,r.name,r.symbol,r.count)}));
+  all.push.apply(all,demoRows);
+  return all.map(function(r){var o=overrides.get(r.key);if(o){r.name=o.name;r.symbol=o.symbol}return r});
+ }
+ function isChecked(r){
+  if(r.legacy)return r.legacy.checked;
+  return selected.has(r.key)?selected.get(r.key):r.key!=='sample:views';
+ }
+ function setChecked(r,v){
+  if(r.legacy&&r.legacy.checked!==v){r.legacy.click()}
+  selected.set(r.key,v);
+ }
+ function render(){
+  rows=readRows();dialog.querySelector('#p2m-layer-total').textContent=String(rows.length);
+  list.replaceChildren();
+  rows.forEach(function(r){
+   var item=document.createElement('div');item.className='p2m-layer-row';
+   var check=document.createElement('input');check.className='p2m-layer-check';check.type='checkbox';
+   check.checked=isChecked(r);check.setAttribute('aria-label',r.name+' anzeigen');
+   check.addEventListener('change',function(){setChecked(r,check.checked)});
+   var content=document.createElement('div');
+   var head=document.createElement('div');head.className='p2m-layer-name';
+   var symbol=document.createElement('span');symbol.className='p2m-layer-emoji';symbol.textContent=r.symbol;
+   head.appendChild(symbol);head.appendChild(document.createTextNode(r.name));
+   var info=document.createElement('div');info.className='p2m-layer-count';
+   info.textContent='Anzahl Objekte: '+r.count;
+   content.append(head,info);
+   var edit=document.createElement('button');edit.className='p2m-layer-edit';edit.type='button';
+   edit.textContent='✎ Bearbeiten';edit.setAttribute('aria-label',r.name+' bearbeiten');
+   edit.addEventListener('click',function(){openEditor('edit',r)});
+   item.append(check,content,edit);list.appendChild(item);
+  });
+ }
+ function showEditor(heading,description,fields,confirm,save){
+  list.hidden=true;dialog.querySelector('.p2m-layer-actions').hidden=true;
+  editor.hidden=false;editor.replaceChildren();
+  var h=document.createElement('h3');h.textContent=heading;h.style.margin='0';
+  var hint=document.createElement('p');hint.className='p2m-layer-note';hint.textContent=description;hint.style.margin='0';
+  editor.append(h,hint);
+  var inputs=[];
+  fields.forEach(function(f){
+   var label=document.createElement('label');label.textContent=f.label;
+   var input=document.createElement('input');input.value=f.value||'';input.placeholder=f.placeholder||'';
+   input.setAttribute('aria-label',f.label);
+   label.appendChild(input);editor.appendChild(label);inputs.push(input);
+  });
+  var actions=document.createElement('div');actions.className='p2m-layer-editor-buttons';
+  var back=document.createElement('button');back.type='button';back.textContent='Zurück';
+  back.onclick=function(){closeEditor()};
+  var yes=document.createElement('button');yes.type='button';yes.className='p2m-layer-primary';yes.textContent=confirm;
+  yes.onclick=function(){save(inputs.map(function(x){return x.value.trim()}))};
+  actions.append(back,yes);editor.appendChild(actions);
+  if(inputs[0])inputs[0].focus();
+ }
+ function closeEditor(){editor.hidden=true;editor.replaceChildren();list.hidden=false;dialog.querySelector('.p2m-layer-actions').hidden=false;render()}
+ function openEditor(mode,r){
+  if(mode==='new'){
+   showEditor('Neue Ebene','UI-Vorschau: Eine neue Ebene wird nur in dieser Ansicht angelegt, nicht im Projekt gespeichert.',
+    [{label:'Name der Ebene',placeholder:'Neue Ebene'},{label:'Symbol (Emoji)',value:'📁'}],
+    'Vorschau hinzufügen',function(v){if(!v[0])return;demoRows.push(make('demo:'+demoRows.length,v[0],v[1]||'📁',0));closeEditor()});return;
+  }
+  if(mode==='merge'){
+   showEditor('Ebenen verbinden','UI-Vorschau: Die spätere Zusammenführungsfunktion ist noch nicht angebunden. Es werden keine Objekte oder Ebenen verändert.',
+    [],'Zurück zur Übersicht',function(){closeEditor()});return;
+  }
+  showEditor(r.name+' bearbeiten','UI-Vorschau: Änderungen an Name und Symbol gelten nur in dieser Ansicht. Projektobjekte bleiben unverändert.',
+   [{label:'Name der Ebene',value:r.name},{label:'Symbol (Emoji)',value:r.symbol}],
+   'Vorschau übernehmen',function(v){if(!v[0])return;overrides.set(r.key,{name:v[0],symbol:v[1]||'📁'});closeEditor()});
+ }
+ dialog.querySelectorAll('[data-act]').forEach(function(button){
+  button.addEventListener('click',function(){
+   var act=button.dataset.act;
+   if(act==='new'||act==='merge'){openEditor(act);return}
+   rows.forEach(function(r){setChecked(r,act==='all'?true:act==='none'?false:!isChecked(r))});
+   render();
+  });
+ });
+ function close(){dialog.hidden=true;opener.setAttribute('aria-expanded','false');if(!editor.hidden)closeEditor()}
+ function open(){render();dialog.hidden=false;opener.setAttribute('aria-expanded','true');dialog.querySelector('.p2m-layer-cancel').focus()}
+ window.p2mPocCloseLayerDialog=close;
+ window.p2mPocToggleLayerDialog=function(){dialog.hidden?open():close()};
+ dialog.querySelector('.p2m-layer-cancel').addEventListener('click',close);
+ dialog.addEventListener('click',function(ev){if(ev.target===dialog)close()});
+ dialog.addEventListener('keydown',function(ev){if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();close()}});
+})();
+</script>
 </body></html>
