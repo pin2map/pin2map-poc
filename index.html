@@ -2460,7 +2460,7 @@ window.p2mTemperatureColorClass=function(v){
 
 # 🐂 [SaddleBrown] Neun</textarea>
 <input type="file" id="gpxStartFilesInput" accept=".gpx,application/gpx+xml" multiple hidden><input type="file" id="gpxStartFolderInput" webkitdirectory directory multiple hidden>
-<div class="buttons"><button id="addCategoryBtn" type="button" class="list-category-btn">＋ Kategorie</button><button id="clear" type="button" class="list-delete-btn">× Reset</button><button id="go" type="button" hidden style="display:none!important" aria-hidden="true" tabindex="-1">Rendern</button><button id="cancelListBtn" type="button" class="list-cancel-btn">Zurück zur Karte</button></div>
+<div class="buttons"><button id="addCategoryBtn" type="button" class="list-category-btn">＋ Ebene</button><button id="clear" type="button" class="list-delete-btn">× Reset</button><button id="go" type="button" hidden style="display:none!important" aria-hidden="true" tabindex="-1">Rendern</button><button id="cancelListBtn" type="button" class="list-cancel-btn">Zurück zur Karte</button></div>
 
 <div id="p2mTemperatureLegend" class="p2m-temperature-legend" aria-label="Temperatur-Farbskala"><strong>Temperatur-Farbskala</strong><div id="p2mTemperatureLegendItems" class="p2m-temperature-legend-items"></div></div>
 <div id="p2mUrlModal" class="p2m-url-modal" role="dialog" aria-modal="true" aria-labelledby="p2mUrlModalTitle" hidden>
@@ -6742,7 +6742,7 @@ var _buildLegendV854=buildLegend;buildLegend=function(items){_buildLegendV854(it
 document.getElementById('addCategoryBtn').onclick=function(){
  var v=input.value.replace(/\r/g,'').replace(/\s+$/,'');
  if(v)v+='\n\n';
- input.value=v+'# 💠 [ hellblau ] Kategorie\n\n';
+ input.value=v+'# 💠 [ hellblau ] Ebene\n\n';
  input.focus();input.setSelectionRange(input.value.length,input.value.length)
 };
 var p2mListLastRendered=input.value;
