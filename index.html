@@ -8796,8 +8796,7 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
   '<div class="p2m-poc-file-actions">'+
   '<button type="button" class="p2m-poc-file-button" data-p2m-forward="openProjectFile"><span aria-hidden="true">📂</span><span>Öffnen</span></button>'+
   '<button type="button" class="p2m-poc-file-button" data-p2m-forward="saveProjectFile"><span aria-hidden="true">💾</span><span>Speichern</span></button></div>'+
-  '<div class="p2m-poc-divider"></div><div class="p2m-poc-menu-section">Darstellung</div>'+
-  '<button type="button" class="p2m-poc-menu-action" data-p2m-forward="legendToggle"><span>☷</span>Kategorien anzeigen / ausblenden</button>';
+  '';
  screen.appendChild(panel);
  function close(){panel.hidden=true;button.setAttribute('aria-expanded','false')}
  function position(){
@@ -9107,6 +9106,56 @@ window.addEventListener('resize',function(){var root=getPopup();if(root){root.st
  document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&menu.classList.contains('open')){close();b.focus()}});
  window.addEventListener('resize',function(){if(menu.classList.contains('open'))position()},{passive:true});
  window.addEventListener('orientationchange',function(){if(menu.classList.contains('open'))position()},{passive:true});
+})();
+</script>
+
+<!-- PoC: Kategorien-Schalter rechts neben dem mittigen Kartenart-Schalter. -->
+<style id="p2m-poc-category-button-css">
+#mapScreen #p2m-poc-category-button{
+ position:absolute!important;z-index:1300!important;
+ top:auto!important;bottom:max(38px,calc(env(safe-area-inset-bottom) + 24px))!important;
+ left:calc(50% + 55px)!important;right:auto!important;
+ transform:translateX(-50%)!important;translate:none!important;
+ box-sizing:border-box!important;aspect-ratio:1/1!important;border-radius:50%!important;
+ width:44px!important;height:44px!important;
+ min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ padding:0!important;margin:0!important;
+ background:rgba(255,255,255,.84)!important;border:1px solid #a5abb3!important;
+ color:#111!important;box-shadow:0 2px 7px #0002!important;
+ font:700 23px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+ touch-action:manipulation!important;cursor:pointer!important;
+}
+#mapScreen #p2m-poc-category-button:active{background:#dceafa!important}
+#mapScreen #p2m-poc-category-button.p2m-categories-filtered{background:#F04438!important;color:#fff!important}
+</style>
+<script id="p2m-poc-category-button-js">
+(function(){
+ var screen=document.getElementById('mapScreen');
+ var original=document.getElementById('legendToggle');
+ if(!screen||!original||document.getElementById('p2m-poc-category-button'))return;
+ var button=document.createElement('button');
+ button.id='p2m-poc-category-button';button.type='button';
+ button.textContent='☷';button.title='Kategorien anzeigen / ausblenden';
+ button.setAttribute('aria-label','Kategorien anzeigen / ausblenden');
+ button.setAttribute('aria-pressed','false');
+ screen.appendChild(button);
+ function sync(){
+  var pressed=original.getAttribute('aria-pressed');
+  if(pressed!==null)button.setAttribute('aria-pressed',pressed);
+  button.classList.toggle('p2m-categories-filtered',original.classList.contains('p2m-categories-filtered'));
+  button.title=original.title||'Kategorien anzeigen / ausblenden';
+  button.setAttribute('aria-label',button.title);
+ }
+ button.addEventListener('click',function(ev){
+  ev.preventDefault();ev.stopPropagation();
+  original.click();sync();
+ });
+ ['pointerdown','touchstart','mousedown'].forEach(function(type){
+  button.addEventListener(type,function(ev){ev.stopPropagation()},{passive:true});
+ });
+ new MutationObserver(sync).observe(original,{attributes:true,attributeFilter:['class','aria-pressed','title','style']});
+ sync();
 })();
 </script>
 </body></html>
