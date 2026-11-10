@@ -1,5 +1,9 @@
 # pin2map UI-PoC – Arbeitsanweisung
 
+> [!IMPORTANT]
+> **ABGRENZUNG ZU pin2map NEW (10.11.2026):** Dieses Repository ist der frühere UI-Prototyp und bleibt **Design-/Verhaltensreferenz**, nicht die aktive Codebasis der neuen modularen Anwendung. Für neue pin2map-NEW-Aufträge gelten [Projektwegweiser](https://github.com/pin2map/pin2map-new-test/blob/feature/leaflet-modular-core/docs/PROJEKTWEGWEISER.md) und [aktuelle Arbeitsanweisung](https://github.com/pin2map/pin2map-new-test/blob/feature/leaflet-modular-core/AGENTS.md). Nachfolgende PoC-spezifische Anweisungen gelten nur, wenn ausdrücklich Arbeiten **am PoC selbst** beauftragt werden. Keine Änderungen am PoC als Änderung der aktuellen NEW-Preview ausgeben.
+
+
 Dies ist ausschließlich die **öffentliche, auf dem iPhone testbare PoC-Webseite**: https://pin2map.github.io/pin2map-poc/
 
 - Aktuelle Oberfläche: `index.html` auf `main`; GitHub Pages veröffentlicht sie.
